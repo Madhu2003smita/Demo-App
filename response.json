@@ -1,0 +1,20 @@
+{
+    "data": [
+        {
+            "id": "1",
+            "first_name": "Madhu",
+            "last_name": "Smita",
+            "user_name": "madhu18",
+            "email": "madhu@gmail.com",
+            "password": "1928"
+        },
+        {
+            "id": "2",
+            "first_name": "Lipika",
+            "last_name": "Behera",
+            "user_name": "lipika04",
+            "email": "lipika@gmail.com",
+            "password": "lipika123"
+        }
+    ]
+}
