@@ -1,78 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Modal, TouchableOpacity, Button, TextInput } from 'react-native';
+import axios from 'axios';
+import Toast from 'react-native-toast-message';
 
-const DATA = [
-  {
-    id: '1',
-    name: 'Liana',
-    email: 'liana@gmail.com',
-    time: '1h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '2',
-    name: 'Hazel',
-    email: 'hazel@gmail.com',
-    time: '1h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '3',
-    name: 'John',
-    email: 'john@gmail.com',
-    time: '2h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '4',
-    name: 'Jack',
-    email: 'jack@gmail.com',
-    time: '2h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '5',
-    name: 'Mia',
-    email: 'mia@gmail.com',
-    time: '3h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '6',
-    name: 'Aahan',
-    email: 'aahan@gmail.com',
-    time: '3h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '7',
-    name: 'Aadav',
-    email: 'aadav@gmail.com',
-    time: '3h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-  {
-    id: '8',
-    name: 'Aman',
-    email: 'aman@gmail.com',
-    time: '3h',
-    image: 'https://tse2.mm.bing.net/th?id=OIP.R87PbOkdc695AAZ-_qrLYwHaHk&pid=Api&P=0&h=180',
-  },
-];
 
 const InboxScreen = () => {
+  const [data, setData] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      
+      try {
+        const response = await axios.get('https://helpdesk.productdemourl.com/mobile/deepak/public/v3/api/agent/ticket-list?category=&filter_id=16');
+        setData(response.data);
+        setLoading(false);
+        
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Fetch Error',
+          text2: 'Unable to fetch data. Please try again later.',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+
 
   const openDrawer = (user) => {
     setSelectedUser(user);
     setModalVisible(true);
+    Toast.show({
+      type: 'info',
+      text1: 'User Selected',
+      text2: `${user.name} has been selected.`,
+    });
   };
 
   const closeDrawer = () => {
     setModalVisible(false);
     setSelectedUser(null);
+    Toast.show({
+      type: 'info',
+      text1: 'Profile Closed',
+      text2: 'You have closed the profile.',
+    });
+  };
+
+  const handleTicketAction = (action) => {
+    Toast.show({
+      type: 'success',
+      text1: `${action} Ticket`,
+      text2: `You ${action.toLowerCase()}d the ticket.`,
+    });
   };
 
   const renderItem = ({ item }) => (
@@ -90,19 +78,20 @@ const InboxScreen = () => {
     </TouchableOpacity>
   );
 
-  const filteredData = DATA.filter((item) =>
-    item.name.toLowerCase().includes(searchText.toLowerCase())
-  );
-
+  
   return (
     <View style={styles.container}>
-      
-      <FlatList
-        data={filteredData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
-
+      <Text style={styles.title}>Inbox</Text>
+      {loading ? (
+        <Text style={styles.loadingText}>Loading...</Text>
+      ) : (
+        <FlatList
+          //data={filteredData}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )
+      }
       <Modal
         animationType="slide"
         transparent={true}
@@ -118,32 +107,40 @@ const InboxScreen = () => {
                 <Text style={styles.modalText}>{selectedUser.email}</Text>
                 <View style={styles.buttonContainer}>
                   <View style={styles.buttonWrapper}>
-                    <Button title="Create Ticket" onPress={() => {}} color="#3da6d7" />
+                    <Button title="Create Ticket" onPress={() => handleTicketAction('Create')} color="#3da6d7" />
                   </View>
                   <View style={styles.buttonWrapper}>
-                    <Button title="Open Ticket" onPress={() => {}} color="#3da6d7" />
+                    <Button title="Open Ticket" onPress={() => handleTicketAction('Open')} color="#3da6d7" />
                   </View>
                   <View style={styles.buttonWrapper}>
-                    <Button title="Closed Ticket" onPress={() => {}} color="#3da6d7" />
+                    <Button title="Close Ticket" onPress={() => handleTicketAction('Close')} color="#3da6d7" />
                   </View>
                   <View style={styles.buttonWrapper}>
-                    <Button title="Delete Ticket" onPress={() => {}} color="#3da6d7" />
+                    <Button title="Delete Ticket" onPress={() => handleTicketAction('Delete')} color="#3da6d7" />
                   </View>
-                  </View>
-                  <Button title="Close" onPress={closeDrawer} color="#3da6d7" /> 
+                </View>
+                <Button title="Close" onPress={closeDrawer} color="#3da6d7" />
               </View>
             )}
           </View>
         </View>
       </Modal>
+
+      <Toast />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f4f4',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   item: {
     flexDirection: 'row',
@@ -187,6 +184,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     backgroundColor: '#fff',
+    marginTop: 100,
     padding: 20,
     marginHorizontal: 20,
     borderRadius: 10,
@@ -217,6 +215,11 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     marginBottom: 10, 
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: 18,
+    marginTop: 20,
   },
 });
 
